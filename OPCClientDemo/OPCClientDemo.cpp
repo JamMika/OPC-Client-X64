@@ -20,7 +20,7 @@ License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 */
-
+//#include "stdafx.h"
 #include <stdio.h>
 #include <sys\timeb.h>
 
@@ -30,6 +30,26 @@ Boston, MA  02111-1307, USA.
 #include "OPCItem.h"
 #include "OPCServer.h"
 #include "opcda.h"
+
+
+volatile bool isRunnung = true;
+
+BOOL WINAPI HandlerRoutine(_In_ DWORD dwCtrlType)
+{
+    switch (dwCtrlType)
+    {
+    case CTRL_C_EVENT:
+        printf("[Ctrl]+C\n");
+        isRunnung = false;
+        // Signal is handled - don't pass it on to the next handler
+        return TRUE;
+    default:
+        // Pass signal on to the next handler
+        return FALSE;
+    }
+}
+
+
 
 /**
  * Code demonstrates
@@ -118,6 +138,8 @@ class CTransComplete : public ITransactionComplete
 
 void main(void)
 {
+    SetConsoleCtrlHandler(HandlerRoutine, TRUE);
+
     COPCClient::init();
 
     printf("input hostname (warning: NOT an IP address, use such as: 'Jhon-PC' or 'localhost' / <ENTER> ):\n"); // See
@@ -342,6 +364,6 @@ void main(void)
 
     // just loop - changes to items within demo group are picked up here
 
-    MESSAGE_PUMP_UNTIL(false)
+    MESSAGE_PUMP_UNTIL(!isRunnung)
 
 } // main

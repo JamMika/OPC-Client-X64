@@ -18,7 +18,7 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 */
 
-#include "stdafx.h"
+//#include "stdafx.h"
 
 #include <fstream>
 #include <iostream>
@@ -74,12 +74,12 @@ class CMyCallback : public IAsyncDataCallback
   public:
     void OnDataChange(COPCGroup &group, COPCItemDataMap &changes)
     {
-        printf("group '%ws', item changes:\n", group.getName().c_str());
+        //printf("group '%ws', item changes:\n", group.getName().c_str());
         POSITION pos = changes.GetStartPosition();
         while (pos)
         {
             OPCItemData *data = changes.GetNextValue(pos);
-            printf("-----> %ws\n", data->item()->getName().c_str());
+            //printf("-----> %ws\n", data->item()->getName().c_str());
         } // while
     }     // OnDataChange
 
@@ -144,7 +144,7 @@ void runRefreshTest(COPCServer &opcServer, const char *fileName, unsigned nbrRef
     CTransComplete complete;
     timeb startTime;
     ftime(&startTime);
-    CTransaction *t = group->refresh(OPC_DS_DEVICE, &complete);
+    //CTransaction *t = group->refresh(OPC_DS_DEVICE, &complete);
     ATL::CAutoPtrArray<CTransaction> transactions;
     CAutoPtr<CTransaction> trans;
     for (unsigned i = 0; i < nbrRefreshs; ++i)
@@ -155,24 +155,24 @@ void runRefreshTest(COPCServer &opcServer, const char *fileName, unsigned nbrRef
 
     while (complete.getNumberOfCompletes() != nbrRefreshs)
     {
+        /*
         MSG msg;
         while (PeekMessage(&msg, nullptr, NULL, NULL, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         } // while
-        Sleep(1);
+        */
+        Sleep(0);
     } // while
 
     timeb endTime;
     ftime(&endTime);
 
-    int processTime_mS =
-        static_cast<int>(((endTime.time - startTime.time) * 1000) + (endTime.millitm - startTime.millitm));
-    printf("It took %d mSec to make %d refreshes (%f refreshs per second)\n", processTime_mS, nbrRefreshs,
-           ((float)processTime_mS) / ((float)nbrRefreshs * 1000.0f));
+    int processTime_mS = static_cast<int>(((endTime.time - startTime.time) * 1000) + (endTime.millitm - startTime.millitm));
+    printf("It took %d mSec to make %d refreshes (%f refreshs per second)\n", processTime_mS, nbrRefreshs, ((float)processTime_mS) / ((float)nbrRefreshs * 1000.0f));
     printf("Each refresh represents a hardware read of %d items\n", static_cast<int>(itemsCreated.size()));
-    delete t;
+    //delete t;
 
     Sleep(1000);
 
@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 
     bool saveNameSpace = (argc == 4);
 
-    COPCClient::init();
+    COPCClient::init(MULTITHREADED);
     COPCHost *host = COPCClient::makeHost(COPCHost::LPCSTR2WS(argv[2]));
     COPCServer *opcServer = host->connectDAServer(COPCHost::LPCSTR2WS(argv[3]));
 
